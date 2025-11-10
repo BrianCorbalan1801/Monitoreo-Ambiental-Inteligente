@@ -4,6 +4,7 @@ from PIL import Image
 from registros import cargar_datos
 from descarga import descarga_registro
 from mapa import mapa_interactivo
+from monitoreo import real
 
 #df = pd.read_csv('dataframe')
 
@@ -18,7 +19,7 @@ def main():
 
     if choice == "Inicio":
         st.subheader("Inicio")
-        st.write("Aca debe de estar la informacion en tiempo real del clima")
+        real()
 
     elif choice == "Descarga registros":
         descarga_registro()
