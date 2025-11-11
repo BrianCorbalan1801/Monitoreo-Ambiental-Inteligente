@@ -13,10 +13,10 @@ latest_data = {"temperatura": 0, "humedad": 0, "co2": 0}
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        print("✅ Conectado al broker MQTT")
+        print("Conectado al broker MQTT")
         client.subscribe(MQTT_TOPIC)
     else:
-        print("❌ Error de conexión con MQTT:", rc)
+        print("Error de conexión con MQTT:", rc)
 
 def on_message(client, userdata, msg):
     global latest_data
