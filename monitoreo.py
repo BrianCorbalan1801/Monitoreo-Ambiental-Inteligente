@@ -1,4 +1,3 @@
-# monitoreo.py
 import streamlit as st
 import json
 import paho.mqtt.client as mqtt
