@@ -5,7 +5,12 @@
   "directories": {
     "test": "tests"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "npx playwright test",
+    "test:report": "npx playwright show-report",
+    "test:headed": "npx playwright test --headed",
+    "codegen": "npx playwright codegen"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BrianCorbalan1801/Monitoreo-Ambiental-Inteligente.git"
@@ -19,7 +24,10 @@
   "homepage": "https://github.com/BrianCorbalan1801/Monitoreo-Ambiental-Inteligente#readme",
   "description": "",
   "devDependencies": {
-    "@playwright/test": "^1.56.1",
+    "@playwright/test": "^1.57.0",
     "@types/node": "^24.10.1"
+  },
+  "dependencies": {
+    "playwright": "^1.57.0"
   }
 }
