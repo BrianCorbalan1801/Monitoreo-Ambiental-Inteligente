@@ -5,6 +5,7 @@ from registros import cargar_datos
 from descarga import descarga_registro
 from mapa import mapa_interactivo
 from monitoreo import real
+from alertas import vista_alertas
 
 #df = pd.read_csv('dataframe')
 
@@ -13,7 +14,7 @@ st.set_page_config(page_title='Monitoreo Ambiental', page_icon='sunrise', layout
 def main():
     st.title("Aplicacion principal")
 
-    menu = ["Inicio", "Descarga registros", "Mapa interactivo", "Registros historicos"]
+    menu = ["Inicio", "Descarga registros", "Mapa interactivo", "Alertas", "Registros historicos"]
 
     choice = st.sidebar.selectbox("Menu", menu)
 
@@ -25,6 +26,8 @@ def main():
         descarga_registro()
     elif choice == "Mapa interactivo":
         mapa_interactivo()
+    elif choice == "Alertas":
+        vista_alertas()
     else:
         st.subheader("Registros historicos")
         cargar_datos()
