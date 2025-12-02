@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("http://10.56.2.71:8501/");
+  await page.goto("http://localhost:8501/");
 });
 
 test.describe("Registros Historicos", () => {
