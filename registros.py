@@ -2,8 +2,12 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import mysql.connector
+import sqlite3
+    
 
-def cargar_datos():
+SwitchDB = False
+
+def cargar_datos_db():
 
     conn = mysql.connector.connect(
         host="10.56.2.71",
@@ -53,3 +57,23 @@ def cargar_datos():
 
     else:
         st.warning("No hay datos en el rango seleccionado.")
+
+def cargar_datos_fk():
+
+    conn = sqlite3.connect('data/monitoreo.db')
+    df_fake = pd.read_sql_query("SELECT * FROM mediciones", conn)
+    conn.close()
+
+    return df_fake
+
+def cargar_datos():
+
+    if SwitchDB == True:
+        st.warning("Se realizo una vinculacion con la Base de datos ficticia.")
+        df_fake = cargar_datos_fk()
+        st.dataframe(df_fake)
+
+    else: 
+        st.success("Se realizo una conexion a la Base de datos mysql")
+        df = cargar_datos_db()
+        st.dataframe(df)

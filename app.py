@@ -7,7 +7,7 @@ from mapa import mapa_interactivo
 from monitoreo import real
 from alertas import vista_alertas
 
-#df = pd.read_csv('dataframe')
+#df = pd.read_csv('data/mediciones.csv')
 
 st.set_page_config(page_title='Monitoreo Ambiental', page_icon='sunrise', layout='wide', initial_sidebar_state='collapsed')
 
