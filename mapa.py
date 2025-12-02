@@ -3,7 +3,9 @@ import folium
 import pandas as pd
 import mysql.connector
 import time
+import sqlite3
 
+SwitchDB = False
 
 def obtener_datos_sensores():
     try:
@@ -39,8 +41,14 @@ def obtener_datos_sensores():
         st.error(f"Error al conectar con la base de datos: {e}")
         return pd.DataFrame()
     
+def obtener_datos_database():
 
-def mapa_interactivo():
+    conn = sqlite3.connect('data/monitoreo.db')
+    df = pd.read_sql_query("SELECT * FROM mediciones", conn)
+    conn.close()
+    
+
+def crear_mapa():
     st.subheader("Mapa interactivo")
     st.write("En este mapa se pueden ver las ubicaciones de los sensores y sus valores actualizados.")
 
@@ -81,3 +89,15 @@ def mapa_interactivo():
     # Render HTML del mapa
     mapa_html = m._repr_html_()
     st.components.v1.html(mapa_html, height=500)
+
+def mapa_interactivo():
+
+    if SwitchDB == True:
+        st.warning("Se realizo una vinculacion con la Base de datos ficticia.")
+        df = obtener_datos_database
+        crear_mapa()
+
+    else: 
+        st.success("Se realizo una conexion a la Base de datos mysql")
+        df = obtener_datos_sensores
+        crear_mapa()
