@@ -3,7 +3,10 @@ import pandas as pd
 import mysql.connector
 from datetime import datetime
 import io
+import sqlite3
 
+
+SwitchDB = True
 
 def obtener_datos_fecha(fecha_inicio, fecha_fin):
     try:
@@ -28,9 +31,22 @@ def obtener_datos_fecha(fecha_inicio, fecha_fin):
     except Exception as e:
         st.error(f"Error al conectar con la base de datos: {e}")
         return pd.DataFrame()
+    
+def obtener_datos_fecha_db(fecha_inicio, fecha_fin):
+
+    conn = sqlite3.connect('data/monitoreo.db')
+    query = f"""
+            SELECT fecha_hora, zona, temperatura, humedad, co2
+            FROM mediciones
+            WHERE DATE(fecha_hora) BETWEEN '{fecha_inicio}' AND '{fecha_fin}'
+            ORDER BY fecha_hora ASC;
+        """
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    return df
 
 
-def descarga_registro():
+def crear_registro():
     st.subheader("Descarga de registros")
     st.write("Seleccione un rango de fechas para exportar los registros de los sensores.")
 
@@ -42,9 +58,9 @@ def descarga_registro():
         fecha_fin = st.date_input("Fecha fin")
 
     if st.button("Buscar registros"):
-        df = obtener_datos_fecha(fecha_inicio, fecha_fin)
+        df = obtener_datos_fecha_db(fecha_inicio, fecha_fin)
 
-        if df.empty:
+        if df.empty:    
             st.warning("No hay registros para el rango seleccionado.")
             return
 
@@ -89,3 +105,15 @@ def descarga_registro():
             file_name=nombre_pdf,
             mime="application/pdf"
         )
+
+def descarga_registro():
+
+    if SwitchDB == True:
+        st.warning("Se realizo una vinculacion con la Base de datos ficticia.")
+        df = obtener_datos_fecha_db()
+        crear_registro()
+
+    else: 
+        st.success("Se realizo una conexion a la Base de datos mysql")
+        df = obtener_datos_fecha()
+        crear_registro()

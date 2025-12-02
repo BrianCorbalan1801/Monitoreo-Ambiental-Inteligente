@@ -66,13 +66,13 @@ def cargar_datos_fk():
 
     df_fake["fecha_hora"] = pd.to_datetime(df_fake["fecha_hora"])
 
-    st.sidebar.header("Filtros")
+    st.header("Filtros")
 
     zonas = df_fake["zona"].unique()
-    zona_seleccionada = st.sidebar.selectbox("Selecciona la zona:", zonas)
+    zona_seleccionada = st.selectbox("Selecciona la zona:", zonas)
 
-    fecha_inicio = st.sidebar.date_input("Desde:", df_fake["fecha_hora"].min().date())
-    fecha_fin = st.sidebar.date_input("Hasta:", df_fake["fecha_hora"].max().date())
+    fecha_inicio = st.date_input("Desde:", df_fake["fecha_hora"].min().date())
+    fecha_fin = st.date_input("Hasta:", df_fake["fecha_hora"].max().date())
 
     # Filtrado
     df_filtrado = df_fake[
