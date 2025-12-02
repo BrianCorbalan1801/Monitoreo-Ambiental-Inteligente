@@ -3,4 +3,4 @@ folium==0.17.0
 paho-mqtt==1.6.1
 matplotlib==3.9.2
 mysql-connector-python==9.5.0
-fpdf==2.8.5
+fpdf==1.7.2
