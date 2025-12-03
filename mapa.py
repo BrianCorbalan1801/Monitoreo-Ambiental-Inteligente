@@ -7,6 +7,15 @@ import sqlite3
 
 SwitchDB = False
 
+def calcular_estado(co2):
+    if co2 < 800:
+        return "Bueno"
+    elif co2 < 1200:
+        return "Moderado"
+    else:
+        return "Malo"
+    
+
 def obtener_datos_sensores():
     try:
         conn = mysql.connector.connect(
@@ -25,15 +34,8 @@ def obtener_datos_sensores():
         df = pd.read_sql(query, conn)
         conn.close()
 
-        def calcular_estado(co2):
-            if co2 < 800:
-                return "Bueno"
-            elif co2 < 1200:
-                return "Moderado"
-            else:
-                return "Malo"
-
-        df["estado"] = df["co2"].apply(calcular_estado)
+        if not df.empty:
+            df["estado"] = df["co2"].apply(calcular_estado)
 
         return df
 
@@ -42,23 +44,31 @@ def obtener_datos_sensores():
         return pd.DataFrame()
     
 def obtener_datos_database():
+    try:
+        conn = sqlite3.connect('data/monitoreo.db')
+        df = pd.read_sql_query("SELECT * FROM mediciones", conn)
+        conn.close()
 
-    conn = sqlite3.connect('data/monitoreo.db')
-    df = pd.read_sql_query("SELECT * FROM mediciones", conn)
-    conn.close()
+        if not df.empty:
+                df["estado"] = df["co2"].apply(calcular_estado)
+
+        return df
+
+    except Exception as e:
+        st.error(f"Error al conectar con la base de datos: {e}")
+        return pd.DataFrame()
     
 
 def crear_mapa():
     st.subheader("Mapa interactivo")
     st.write("En este mapa se pueden ver las ubicaciones de los sensores y sus valores actualizados.")
 
-    st.write("🔄 El mapa se actualiza automáticamente cada **30 segundos**.")
+    if SwitchDB == True:
+        df = obtener_datos_database()
 
-    time.sleep(30)
-    st.rerun()
+    else: 
+        df = obtener_datos_sensores()
 
-
-    df = obtener_datos_sensores()
 
     if df.empty:
         st.warning("No se pudieron cargar datos desde la base.")
@@ -90,14 +100,18 @@ def crear_mapa():
     mapa_html = m._repr_html_()
     st.components.v1.html(mapa_html, height=500)
 
+    st.write("🔄 El mapa se actualiza automáticamente cada **30 segundos**.")
+    time.sleep(30)
+    st.rerun()
+
 def mapa_interactivo():
 
     if SwitchDB == True:
         st.warning("Se realizo una vinculacion con la Base de datos ficticia.")
-        df = obtener_datos_database
+        df = obtener_datos_database()
         crear_mapa()
 
     else: 
         st.success("Se realizo una conexion a la Base de datos mysql")
-        df = obtener_datos_sensores
+        df = obtener_datos_sensores()
         crear_mapa()
