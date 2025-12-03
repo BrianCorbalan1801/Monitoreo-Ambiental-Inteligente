@@ -5,7 +5,7 @@ import mysql.connector
 import time
 import sqlite3
 
-SwitchDB = False
+SwitchDB = True
 
 def calcular_estado(co2):
     if co2 < 800:
