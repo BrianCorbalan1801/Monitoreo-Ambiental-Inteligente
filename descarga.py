@@ -33,22 +33,32 @@ def obtener_datos_fecha_db(fecha_inicio, fecha_fin):
         st.error(f"Error al conectar con la base de datos: {e}")
         return pd.DataFrame()
     
+    
 def obtener_datos_fecha_fk(fecha_inicio, fecha_fin):
+    try:
+        conn = sqlite3.connect('data/monitoreo.db')
+        query = f"""
+                SELECT fecha_hora, zona, temperatura, humedad, co2
+                FROM mediciones
+                WHERE DATE(fecha_hora) BETWEEN '{fecha_inicio}' AND '{fecha_fin}'
+                ORDER BY fecha_hora ASC;
+            """
+        df = pd.read_sql_query(query, conn)
+        conn.close()
+        return df
+    except Exception as e:
+        st.error(f"Error usando la base de datos local: {e}")
+        return pd.DataFrame
 
-    conn = sqlite3.connect('data/monitoreo.db')
-    query = f"""
-            SELECT fecha_hora, zona, temperatura, humedad, co2
-            FROM mediciones
-            WHERE DATE(fecha_hora) BETWEEN '{fecha_inicio}' AND '{fecha_fin}'
-            ORDER BY fecha_hora ASC;
-        """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df
 
-
-def crear_registro():
+def descarga_registro():
     st.subheader("Descarga de registros")
+
+    if SwitchDB == True:
+            st.warning("Usando la base de datos ficticia")
+    else:
+        st.success("Se uso una conexion al MYSQL")
+
     st.write("Seleccione un rango de fechas para exportar los registros de los sensores.")
 
     col1, col2 = st.columns(2)
@@ -57,10 +67,14 @@ def crear_registro():
         fecha_inicio = st.date_input("Fecha inicio")
     with col2:
         fecha_fin = st.date_input("Fecha fin")
+    
 
-    if st.button("Buscar registros") and SwitchDB == True:
-        df = obtener_datos_fecha_db(fecha_inicio, fecha_fin)
+    if st.button("Buscar registros"):
         
+        if SwitchDB == True:
+            df = obtener_datos_fecha_fk
+        else:
+            df = obtener_datos_fecha_db
 
         if df.empty:    
             st.warning("No hay registros para el rango seleccionado.")
@@ -153,14 +167,6 @@ def crear_registro():
             mime="application/pdf"
         )
 
-def descarga_registro():
 
-    if SwitchDB == True:
-        st.warning("Se realizo una vinculacion con la Base de datos ficticia.")
-        df = obtener_datos_fecha_db()
-        crear_registro()
 
-    else: 
-        st.success("Se realizo una conexion a la Base de datos mysql")
-        df = obtener_datos_fecha_fk()
-        crear_registro()
+
