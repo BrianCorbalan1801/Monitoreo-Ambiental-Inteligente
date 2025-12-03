@@ -108,6 +108,7 @@ def descarga_registro():
             if y < 40:
                 c.showPage()
                 y = 800
+        
 
         c.save()
 
@@ -166,6 +167,7 @@ def descarga_registro():
             file_name=nombre_pdf,
             mime="application/pdf"
         )
+    
 
 
 
