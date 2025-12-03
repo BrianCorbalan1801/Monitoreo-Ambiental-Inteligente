@@ -2,13 +2,14 @@ import streamlit as st
 import pandas as pd
 import mysql.connector
 from datetime import datetime
+from reportlab.pdfgen import canvas
 import io
 import sqlite3
 
 
 SwitchDB = True
 
-def obtener_datos_fecha(fecha_inicio, fecha_fin):
+def obtener_datos_fecha_db(fecha_inicio, fecha_fin):
     try:
         conn = mysql.connector.connect(
             host="10.56.2.71",
@@ -32,7 +33,7 @@ def obtener_datos_fecha(fecha_inicio, fecha_fin):
         st.error(f"Error al conectar con la base de datos: {e}")
         return pd.DataFrame()
     
-def obtener_datos_fecha_db(fecha_inicio, fecha_fin):
+def obtener_datos_fecha_fk(fecha_inicio, fecha_fin):
 
     conn = sqlite3.connect('data/monitoreo.db')
     query = f"""
@@ -57,8 +58,9 @@ def crear_registro():
     with col2:
         fecha_fin = st.date_input("Fecha fin")
 
-    if st.button("Buscar registros"):
+    if st.button("Buscar registros") and SwitchDB == True:
         df = obtener_datos_fecha_db(fecha_inicio, fecha_fin)
+        
 
         if df.empty:    
             st.warning("No hay registros para el rango seleccionado.")
@@ -77,7 +79,52 @@ def crear_registro():
             mime="text/csv"
         )
 
-        from reportlab.pdfgen import canvas
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer)
+
+        c.setFont("Helvetica", 12)
+        c.drawString(20, 800, "Reporte de registros de sensores")
+        c.drawString(20, 780, f"Fecha de exportación: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+
+        y = 750
+        for index, row in df.iterrows():
+            texto = f"{row['fecha_hora']} | {row['zona']} | T={row['temperatura']}°C | H={row['humedad']}% | CO₂={row['co2']} ppm"
+            c.drawString(20, y, texto)
+            y -= 20
+            if y < 40:
+                c.showPage()
+                y = 800
+
+        c.save()
+
+        nombre_pdf = f"Registros_{datetime.now().strftime('%Y-%m-%d')}.pdf"
+
+        st.download_button(
+            label="Descargar PDF",
+            data=buffer.getvalue(),
+            file_name=nombre_pdf,
+            mime="application/pdf"
+        )
+    else:
+        df = obtener_datos_fecha_fk(fecha_inicio, fecha_fin)
+        
+
+        if df.empty:    
+            st.warning("No hay registros para el rango seleccionado.")
+            return
+
+        st.dataframe(df)
+
+        csv = df.to_csv(index=False).encode("utf-8")
+
+        nombre_csv = f"Registros_{datetime.now().strftime('%Y-%m-%d')}.csv"
+
+        st.download_button(
+            label="Descargar CSV",
+            data=csv,
+            file_name=nombre_csv,
+            mime="text/csv"
+        )
 
         buffer = io.BytesIO()
         c = canvas.Canvas(buffer)
@@ -115,5 +162,5 @@ def descarga_registro():
 
     else: 
         st.success("Se realizo una conexion a la Base de datos mysql")
-        df = obtener_datos_fecha()
+        df = obtener_datos_fecha_fk()
         crear_registro()
